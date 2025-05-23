@@ -1,6 +1,6 @@
 [project]
 name = "caltrain-mcp"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Model Context Protocol server for Caltrain schedules"
 readme = "README.md"
 authors = [
@@ -20,7 +20,7 @@ caltrain-mcp = "caltrain_mcp.server:main"
 caltrain-lint = "scripts.lint:main"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [dependency-groups]
@@ -31,6 +31,9 @@ dev = [
     "mypy>=1.13.0",
     "types-requests>=2.32.0",
     "pandas-stubs>=2.2.0",
+    "python-semantic-release>=9.0.0",
+    "build>=1.0.0",
+    "twine>=4.0.0",
 ]
 
 [tool.ruff]
@@ -76,3 +79,27 @@ addopts = [
     "--strict-config",
     "--disable-warnings",
 ]
+
+[tool.hatch.version]
+source = "vcs"                 # Use Git tags
+tag-pattern = "v(?P<version>.+)"  # Tags like v1.2.3 → 1.2.3
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/caltrain_mcp"]   # Ensures the package is included
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/**",
+  "README.md",
+  "LICENSE.md",
+]
+
+[tool.semantic_release]
+version_source = "tag"
+branch = "main"
+upload_to_pypi = false
+version_variables = [
+    "src/caltrain_mcp/__init__.py:__version__",
+]
+changelog_file = "CHANGELOG.md"
+build_command = "pip install build && python -m build"

@@ -1,5 +1,10 @@
 # 🚂 Caltrain MCP Server (Because You Love Waiting for Trains)
 
+[![PyPI](https://img.shields.io/pypi/v/caltrain-mcp)](https://pypi.org/project/caltrain-mcp/)
+[![CI](https://github.com/davidyen1124/caltrain-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/davidyen1124/caltrain-mcp/actions/workflows/ci.yml)
+[![Publish](https://github.com/davidyen1124/caltrain-mcp/actions/workflows/release.yml/badge.svg)](https://github.com/davidyen1124/caltrain-mcp/actions/workflows/release.yml)
+[![License](https://img.shields.io/github/license/davidyen1124/caltrain-mcp)](LICENSE.md)
+
 ![Caltrain MCP Demo](assets/caltrain-mcp-demo.png)
 
 A Model Context Protocol (MCP) server that promises to tell you _exactly_ when the next Caltrain will arrive... and then be 10 minutes late anyway. Uses real GTFS data, so at least the disappointment is official!
@@ -199,6 +204,57 @@ This project uses modern Python tooling to keep the code clean and maintainable:
 - **MyPy**: Type checking (because guessing types is for amateurs)
 - **Pytest**: Testing framework with coverage reporting
 - **Pre-commit**: Automatic checks before committing (preventing embarrassment since forever)
+
+### Release Process (Automated Awesomeness)
+
+This project uses automated versioning and publishing:
+
+- **Semantic Versioning**: Version numbers are automatically determined from commit messages using [Conventional Commits](https://www.conventionalcommits.org/)
+- **Automatic Tagging**: When you push to `main`, semantic-release creates version tags automatically
+- **PyPI Publishing**: Tagged releases are automatically built and published to PyPI via GitHub Actions
+- **Trusted Publishing**: Uses OIDC authentication with PyPI (no API tokens needed!)
+
+#### Making a Release
+
+Just commit using conventional commit format and push to main:
+
+```bash
+# For bug fixes (patch version bump: 1.0.0 → 1.0.1)
+git commit -m "fix: correct station name lookup bug"
+
+# For new features (minor version bump: 1.0.0 → 1.1.0)
+git commit -m "feat: add support for weekend schedules"
+
+# For breaking changes (major version bump: 1.0.0 → 2.0.0)
+git commit -m "feat!: redesign API structure"
+# or
+git commit -m "feat: major API changes
+
+BREAKING CHANGE: This changes the function signatures"
+```
+
+The semantic-release workflow will:
+
+1. Analyze your commit messages
+2. Determine the appropriate version bump
+3. Create a git tag (e.g., `v1.2.3`)
+4. Generate a changelog
+5. Trigger the release workflow to publish to PyPI
+
+#### Local Testing
+
+Test the build process locally before pushing:
+
+```bash
+# Build packages locally
+uv run python -m build --sdist --wheel
+
+# Validate packages
+uv run twine check dist/*
+
+# Test upload to Test PyPI (optional)
+uv run twine upload --repository testpypi dist/*
+```
 
 #### Running All Checks Locally
 
