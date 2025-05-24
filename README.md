@@ -55,13 +55,14 @@ Add this to your Claude Desktop MCP configuration file:
 {
   "mcpServers": {
     "caltrain": {
-      "command": "uv",
-      "args": ["run", "caltrain-mcp"],
-      "cwd": "/path/to/your/caltrain-mcp"
+      "command": "uvx",
+      "args": ["caltrain-mcp"]
     }
   }
 }
 ```
+
+This will automatically install and run the latest version from PyPI.
 
 Then restart Claude Desktop and you'll have access to Caltrain schedules directly in your conversations!
 
