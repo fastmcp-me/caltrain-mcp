@@ -31,8 +31,6 @@ dev = [
     "types-requests>=2.32.0",
     "pandas-stubs>=2.2.0",
     "python-semantic-release>=9.0.0",
-    "build>=1.0.0",
-    "twine>=4.0.0",
 ]
 
 [tool.ruff]
@@ -80,12 +78,11 @@ addopts = [
 ]
 
 [tool.hatch.version]
-source = "vcs"                 # Use Git tags
-tag-pattern = "v(?P<version>.+)"  # Tags like v1.2.3 → 1.2.3
-fallback-version = "0.0.0"    # Fallback if no tags found
+source = "vcs"
+fallback-version = "0.0.0"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/caltrain_mcp"]   # Ensures the package is included
+packages = ["src/caltrain_mcp"]
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -95,9 +92,9 @@ include = [
 ]
 
 [tool.semantic_release]
-version_source      = "tag_only"
-branch              = "main"
-upload_to_pypi      = false
+version_source = "tag_only"
+branch = "main"
+upload_to_pypi = false
 upload_to_vcs_release = true
 commit_version_number = false
 
