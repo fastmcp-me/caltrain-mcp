@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.2.3 (2025-05-24)
+
+### Bug Fixes
+
+- Add fallback version to pyproject.toml and enhance CI workflow for building from clean tags
+  ([`d90e701`](https://github.com/davidyen1124/caltrain-mcp/commit/d90e701041f44f804d302452342547c9c221f61d))
+
+
 ## v0.2.2 (2025-05-24)
 
 ### Bug Fixes
