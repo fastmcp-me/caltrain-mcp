@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.7.1 (2025-05-24)
+
+### Chores
+
+- Remove outdated deployment checklist and related documentation from README
+  ([`69dec97`](https://github.com/davidyen1124/caltrain-mcp/commit/69dec979cf9b4aadff019dc631eaf1c385568b6d))
+
+### Documentation
+
+- Update README with new command and args for Caltrain MCP configuration
+  ([`f086fbe`](https://github.com/davidyen1124/caltrain-mcp/commit/f086fbed5d2ad6b021789e9da8c1ec01889bddeb))
+
+
 ## v0.7.0 (2025-05-24)
 
 ### Features
