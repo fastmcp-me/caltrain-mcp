@@ -43,13 +43,38 @@ jobs:
           git_committer_name: 'github-actions'
           git_committer_email: 'actions@users.noreply.github.com'
 
-      - name: Checkout the tagged version
+      - name: Checkout tagged version for building
         if: steps.semrel.outputs.released == 'true'
-        run: git checkout v${{ steps.semrel.outputs.version }}
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ steps.semrel.outputs.version }}
+          clean: true
 
-      - name: Build package from tagged version
+      - name: Setup Python for build
         if: steps.semrel.outputs.released == 'true'
-        run: uv run python -m build
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Setup uv for build
+        if: steps.semrel.outputs.released == 'true'
+        uses: astral-sh/setup-uv@v6
+
+      - name: Build package from clean tag
+        if: steps.semrel.outputs.released == 'true'
+        run: |
+          # Verify we're on the right tag
+          echo "Current git describe: $(git describe --exact-match --tags HEAD)"
+          echo "Git status: $(git status --porcelain)"
+
+          # Install build dependencies
+          uv sync --dev
+
+          # Build the package
+          uv run python -m build
+
+          # Show what was built
+          ls -la dist/
 
       - name: Publish to PyPI
         if: steps.semrel.outputs.released == 'true'

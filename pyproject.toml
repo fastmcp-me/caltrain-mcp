@@ -82,6 +82,7 @@ addopts = [
 [tool.hatch.version]
 source = "vcs"                 # Use Git tags
 tag-pattern = "v(?P<version>.+)"  # Tags like v1.2.3 → 1.2.3
+fallback-version = "0.0.0"    # Fallback if no tags found
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/caltrain_mcp"]   # Ensures the package is included
