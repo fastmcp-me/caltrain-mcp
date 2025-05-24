@@ -1,13 +1,15 @@
-name: CI
+name: CI & Publish
 
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+
+permissions:
+  contents: write
+  id-token: write
 
 jobs:
-  test:
+  test-and-release:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -15,6 +17,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -22,22 +26,25 @@ jobs:
 
       - uses: astral-sh/setup-uv@v6
 
-      - name: Install dependencies
-        run: |
-          uv sync --all-extras --dev
+      - name: Install dev deps
+        run: uv sync --all-extras --dev
 
-      - name: Run ruff linter
+      - name: Ruff / MyPy / PyTest
         run: |
           uv run ruff check .
-
-      - name: Run ruff formatter
-        run: |
-          uv run ruff format --check .
-
-      - name: Run mypy type checker
-        run: |
           uv run mypy src
-
-      - name: Run pytest
-        run: |
           uv run pytest --cov=src/caltrain_mcp --cov-report=term-missing
+
+      - name: Python Semantic Release
+        id: semrel
+        uses: python-semantic-release/python-semantic-release@v9.21.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          git_committer_name: 'github-actions'
+          git_committer_email: 'actions@users.noreply.github.com'
+
+      - name: Publish to PyPI
+        if: steps.semrel.outputs.released == 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/

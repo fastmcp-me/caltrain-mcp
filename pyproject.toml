@@ -10,8 +10,6 @@ requires-python = ">=3.13"
 dependencies = [
     "mcp>=1.9.1",
     "pandas>=2.2.3",
-    "pytest-asyncio>=0.26.0",
-    "pytest-cov>=6.1.1",
     "requests>=2.32.3",
 ]
 
@@ -26,6 +24,7 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "pytest>=8.3.5",
+    "pytest-asyncio>=0.26.0",
     "pytest-cov>=6.1.1",
     "ruff>=0.8.0",
     "mypy>=1.13.0",
@@ -95,11 +94,14 @@ include = [
 ]
 
 [tool.semantic_release]
-version_source = "tag"
-version_pattern = "src/caltrain_mcp/__init__.py:__version__ = \"{version}\""
-tag_format = "v{version}"
-branch = "main"
-upload_to_pypi = false
+version_source      = "tag"
+version_pattern     = "src/caltrain_mcp/__init__.py:__version__ = \"{version}\""
+branch              = "main"
+upload_to_pypi      = false
 upload_to_vcs_release = true
-changelog_file = "CHANGELOG.md"
-build_command = "pip install build && python -m build"
+build_command       = "python -m build"
+
+release_rules = [
+  {type = "docs",  release = "patch"},
+  {type = "chore", release = "patch"},
+]

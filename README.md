@@ -1,9 +1,7 @@
 # 🚂 Caltrain MCP Server (Because You Love Waiting for Trains)
 
 [![PyPI](https://img.shields.io/pypi/v/caltrain-mcp)](https://pypi.org/project/caltrain-mcp/)
-[![CI](https://github.com/davidyen1124/caltrain-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/davidyen1124/caltrain-mcp/actions/workflows/ci.yml)
-[![Publish](https://github.com/davidyen1124/caltrain-mcp/actions/workflows/release.yml/badge.svg)](https://github.com/davidyen1124/caltrain-mcp/actions/workflows/release.yml)
-[![License](https://img.shields.io/github/license/davidyen1124/caltrain-mcp)](LICENSE.md)
+[![CI & Semantic release](https://github.com/davidyen1124/caltrain-mcp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/davidyen1124/caltrain-mcp/actions/workflows/ci.yml)
 
 ![Caltrain MCP Demo](assets/caltrain-mcp-demo.png)
 
