@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v0.8.0 (2025-05-24)
+
+### Features
+
+- Add git configuration step for semantic release
+  ([`56d29e2`](https://github.com/davidyen1124/caltrain-mcp/commit/56d29e26b418189f6cbe93d71a0df4625830e9f4))
+
+- Enable tag without push for semantic release
+  ([`32470e1`](https://github.com/davidyen1124/caltrain-mcp/commit/32470e14523d53a9d48b149d20e3c613a7716027))
+
+
 ## v0.7.1 (2025-05-24)
 
 ### Chores
