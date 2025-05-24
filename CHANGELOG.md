@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.2.1 (2025-05-24)
+
+### Bug Fixes
+
+- Move build step after semantic-release to ensure proper version tagging
+  ([`9b8196f`](https://github.com/davidyen1124/caltrain-mcp/commit/9b8196f77e7984e5659733c9eab72616d1696994))
+
+
 ## v0.2.0 (2025-05-24)
 
 ### Bug Fixes
