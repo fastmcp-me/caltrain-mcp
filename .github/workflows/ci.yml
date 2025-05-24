@@ -35,9 +35,6 @@ jobs:
           uv run mypy src
           uv run pytest --cov=src/caltrain_mcp --cov-report=term-missing
 
-      - name: Build package
-        run: uv run python -m build
-
       - name: Python Semantic Release
         id: semrel
         uses: python-semantic-release/python-semantic-release@v9.21.1
@@ -45,6 +42,10 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           git_committer_name: 'github-actions'
           git_committer_email: 'actions@users.noreply.github.com'
+
+      - name: Build package
+        if: steps.semrel.outputs.released == 'true'
+        run: uv run python -m build
 
       - name: Publish to PyPI
         if: steps.semrel.outputs.released == 'true'
