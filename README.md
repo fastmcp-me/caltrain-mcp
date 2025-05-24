@@ -71,7 +71,7 @@ Then restart Claude Desktop and you'll have access to Caltrain schedules directl
 Any MCP-compatible client can use this server by starting it with:
 
 ```bash
-uv run caltrain-mcp
+uvx caltrain-mcp
 ```
 
 The server communicates via stdin/stdout using the MCP protocol. It doesn't do anything exciting when run directly - it just sits there waiting for proper MCP messages.
@@ -202,7 +202,6 @@ This project uses modern Python tooling to keep the code clean and maintainable:
 - **Ruff**: Lightning-fast linting and formatting (because life's too short for slow tools)
 - **MyPy**: Type checking (because guessing types is for amateurs)
 - **Pytest**: Testing framework with coverage reporting
-- **Pre-commit**: Automatic checks before committing (preventing embarrassment since forever)
 
 ### Release Process (Automated Awesomeness)
 
@@ -255,36 +254,6 @@ uv run twine check dist/*
 uv run twine upload --repository testpypi dist/*
 ```
 
-#### Running All Checks Locally
-
-Before pushing your masterpiece to GitHub:
-
-```bash
-# Run all checks at once (the full gauntlet)
-uv run python scripts/lint.py
-
-# Or use the installed script
-uv run caltrain-lint
-
-# Individual commands if you like to suffer step by step:
-uv run ruff check .              # Linting
-uv run ruff format --check .     # Formatting check
-uv run mypy src tests           # Type checking
-uv run pytest --cov=src/caltrain_mcp --cov-report=term-missing  # Tests with coverage
-```
-
-#### Setting Up Pre-commit Hooks
-
-To automatically run checks before every commit (because we all forget):
-
-```bash
-# Install pre-commit hooks
-uv run pre-commit install
-
-# Test the hooks
-uv run pre-commit run --all-files
-```
-
 #### GitHub Actions CI
 
 Every PR and push to main triggers automatic checks:
@@ -296,31 +265,6 @@ Every PR and push to main triggers automatic checks:
 - ✅ **Coverage**: Test coverage reporting in CI logs
 
 The CI will politely reject your PR if any checks fail, because standards matter.
-
-### Running Tests
-
-Because we're responsible developers who definitely don't just ship to production:
-
-```bash
-# Run all tests (the full experience)
-uv run pytest
-
-# Run specific test modules (because sometimes you just want to focus)
-uv run pytest tests/test_gtfs.py      # Test GTFS data processing
-uv run pytest tests/test_server.py    # Test MCP server functionality
-uv run pytest tests/test_fetch_gtfs.py # Test data fetching
-
-# Run with verbose output (for when you need to see everything fail in detail)
-uv run pytest -v
-```
-
-### Test Coverage
-
-Our test suite includes:
-
-- **GTFS module tests** (8 tests): Station lookups, time parsing, service calendars
-- **Server tests** (4 tests): MCP protocol handling, error cases, timezone handling
-- **Data fetching tests** (7 tests): Download handling, ZIP extraction, error cases
 
 ## MCP Integration (For the AI Overlords)
 
