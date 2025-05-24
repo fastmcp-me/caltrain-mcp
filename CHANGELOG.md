@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.6.0 (2025-05-24)
+
+### Features
+
+- Include data files in wheel and sdist build targets
+  ([`9fad56e`](https://github.com/davidyen1124/caltrain-mcp/commit/9fad56e57c300b9418f29f60ac871a8180a53d43))
+
+
 ## v0.5.0 (2025-05-24)
 
 ### Chores
