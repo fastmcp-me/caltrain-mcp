@@ -55,6 +55,11 @@ jobs:
       - name: Install dependencies
         run: uv sync --dev
 
+      - name: Configure git
+        run: |
+          git config --global user.name "David Yen"
+          git config --global user.email "davidyen1124@gmail.com"
+
       - name: Python Semantic Release
         id: release
         uses: python-semantic-release/python-semantic-release@v9.21.1
