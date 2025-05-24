@@ -98,7 +98,6 @@ version_source      = "tag_only"
 branch              = "main"
 upload_to_pypi      = false
 upload_to_vcs_release = true
-build_command       = "python -m build"
 commit_version_number = false
 
 [tool.semantic_release.commit_parser_options]
