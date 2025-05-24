@@ -1,6 +1,20 @@
 # CHANGELOG
 
 
+## v0.3.0 (2025-05-24)
+
+### Chores
+
+- Remove environment specification from CI workflow to simplify configuration
+  ([`1151fe9`](https://github.com/davidyen1124/caltrain-mcp/commit/1151fe912ab3a80cb8459755fc031ea9e0162f9c))
+
+### Features
+
+- Update CI workflow for clearer separation of testing and release steps, and clean up
+  pyproject.toml by removing unnecessary dependencies
+  ([`65fe8b8`](https://github.com/davidyen1124/caltrain-mcp/commit/65fe8b856730239d3a38115b04e5b8bd56ac0374))
+
+
 ## v0.2.3 (2025-05-24)
 
 ### Bug Fixes
