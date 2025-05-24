@@ -1,6 +1,20 @@
 # CHANGELOG
 
 
+## v0.2.2 (2025-05-24)
+
+### Bug Fixes
+
+- Install build dependencies globally for semantic-release Docker container
+  ([`2a9470d`](https://github.com/davidyen1124/caltrain-mcp/commit/2a9470dd3bf0407e8e326d950d99f78433ff6969))
+
+- Remove build command from pyproject.toml to streamline semantic-release process
+  ([`e18e042`](https://github.com/davidyen1124/caltrain-mcp/commit/e18e042b0e23325bfc11c2e72ba06054a82dbdd8))
+
+- Remove build from semantic-release and build from tagged commit with proper dependencies
+  ([`0a96dff`](https://github.com/davidyen1124/caltrain-mcp/commit/0a96dffc191671ee35ddf59d79bf560cd4342362))
+
+
 ## v0.2.1 (2025-05-24)
 
 ### Bug Fixes
