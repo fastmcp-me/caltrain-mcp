@@ -31,6 +31,7 @@ dev = [
     "types-requests>=2.32.0",
     "pandas-stubs>=2.2.0",
     "python-semantic-release>=9.0.0",
+    "build>=1.2.2.post1",
 ]
 
 [tool.ruff]
