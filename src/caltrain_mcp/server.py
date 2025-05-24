@@ -153,9 +153,13 @@ def main() -> None:
             stations_count = (
                 len(gtfs.STATIONS_DF) if gtfs.STATIONS_DF is not None else 0
             )
-            print(f"Loaded GTFS data successfully. Found {stations_count} stations.")
+            # Use stderr for logging to avoid interfering with MCP protocol on stdout
+            print(
+                f"Loaded GTFS data successfully. Found {stations_count} stations.",
+                file=sys.stderr,
+            )
         except Exception as e:
-            print(f"Error loading GTFS data: {e}")
+            print(f"Error loading GTFS data: {e}", file=sys.stderr)
             sys.exit(1)
 
     mcp.run(transport="stdio")
