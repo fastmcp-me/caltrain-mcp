@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.4.0 (2025-05-24)
+
+### Features
+
+- Add build step to CI workflow for package preparation before publishing to PyPI
+  ([`62e9b6c`](https://github.com/davidyen1124/caltrain-mcp/commit/62e9b6c4a48a9495079306405fde9445c9a3eff5))
+
+
 ## v0.3.0 (2025-05-24)
 
 ### Chores
