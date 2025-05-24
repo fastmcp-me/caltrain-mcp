@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.7.0 (2025-05-24)
+
+### Features
+
+- Enable PyPI publishing for automated releases
+  ([`5cbaf29`](https://github.com/davidyen1124/caltrain-mcp/commit/5cbaf29ef9016f3127b4ca0843ff90959b2190f3))
+
+### Refactoring
+
+- Reorganize GTFS data structure and update paths in configuration and scripts
+  ([`f5e792c`](https://github.com/davidyen1124/caltrain-mcp/commit/f5e792ca80429fedd1fd29a4d83ca2b576bed32f))
+
+
 ## v0.6.1 (2025-05-24)
 
 ### Bug Fixes
