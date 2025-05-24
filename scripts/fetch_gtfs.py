@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Download the latest Caltrain GTFS feed, unzip, and place it in
-data/caltrain-ca-us
+src/caltrain_mcp/data/caltrain-ca-us
 """
 
 import io
@@ -13,7 +13,13 @@ import zipfile
 import requests
 
 GTFS_URL = "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip"
-TARGET_DIR = pathlib.Path(__file__).parent.parent / "data" / "caltrain-ca-us"
+TARGET_DIR = (
+    pathlib.Path(__file__).parent.parent
+    / "src"
+    / "caltrain_mcp"
+    / "data"
+    / "caltrain-ca-us"
+)
 
 
 def main():
@@ -24,9 +30,11 @@ def main():
     with tempfile.TemporaryDirectory() as td:
         with zipfile.ZipFile(io.BytesIO(r.content)) as zf:
             zf.extractall(td)
+
+        # Clean and create data directory
         shutil.rmtree(TARGET_DIR, ignore_errors=True)
-        shutil.move(td, TARGET_DIR)
-    print(f"✅  GTFS refreshed in {TARGET_DIR}")
+        shutil.copytree(td, TARGET_DIR)
+        print(f"✅  GTFS refreshed in {TARGET_DIR}")
 
 
 if __name__ == "__main__":

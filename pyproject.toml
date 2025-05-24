@@ -83,12 +83,10 @@ fallback-version = "0.0.0"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/caltrain_mcp"]
-include = ["data/**"]
 
 [tool.hatch.build.targets.sdist]
 include = [
   "src/**",
-  "data/**",
   "README.md",
   "LICENSE.md",
 ]

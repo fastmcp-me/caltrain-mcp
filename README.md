@@ -28,7 +28,7 @@ A Model Context Protocol (MCP) server that promises to tell you _exactly_ when t
    ```
 
 2. **Get that sweet, sweet GTFS data**:
-   The server expects Caltrain GTFS data in the `data/caltrain-ca-us/` directory. Because apparently we can't just ask the trains nicely where they are.
+   The server expects Caltrain GTFS data in the `src/caltrain_mcp/data/caltrain-ca-us/` directory. Because apparently we can't just ask the trains nicely where they are.
 
    ```bash
    uv run python scripts/fetch_gtfs.py
@@ -173,6 +173,7 @@ caltrain-mcp/
 │   ├── ci.yml                 # Main CI pipeline (linting, testing, the works)
 │   └── update-gtfs.yml        # Automated GTFS data updates
 ├── src/caltrain_mcp/          # Main package (because modern Python demands structure)
+│   ├── data/caltrain-ca-us/   # GTFS data storage (where CSV files go to retire)
 │   ├── __init__.py            # Package initialization (the ceremony of Python)
 │   ├── __main__.py            # Entry point for python -m caltrain_mcp
 │   ├── server.py              # MCP server implementation (where the magic happens)
@@ -186,7 +187,6 @@ caltrain-mcp/
 │   ├── test_gtfs.py           # GTFS functionality tests (8 tests of data wrangling)
 │   ├── test_server.py         # Server functionality tests (4 tests of MCP protocol)
 │   └── test_fetch_gtfs.py     # Data fetching tests (7 tests of download chaos)
-├── data/                      # GTFS data storage (where CSV files go to retire)
 ├── .pre-commit-config.yaml    # Pre-commit hooks configuration
 ├── pyproject.toml             # Modern Python config (because setup.py is so 2020)
 └── README.md                  # This literary masterpiece

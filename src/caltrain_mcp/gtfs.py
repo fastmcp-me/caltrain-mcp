@@ -18,10 +18,16 @@ CALENDAR_DF = None
 
 def get_gtfs_folder() -> Path:
     """Get the path to the GTFS data folder."""
-    # From the package location, go up to workspace root, then to data
+    # Look for data bundled with the package
     package_dir = Path(__file__).parent
-    workspace_root = package_dir.parent.parent
-    return workspace_root / "data" / "caltrain-ca-us"
+    bundled_data = package_dir / "data" / "caltrain-ca-us"
+
+    if bundled_data.exists():
+        return bundled_data
+
+    raise FileNotFoundError(
+        f"GTFS data not found at {bundled_data}. Run 'uv run python scripts/fetch_gtfs.py' to download data."
+    )
 
 
 def load_gtfs_data() -> None:

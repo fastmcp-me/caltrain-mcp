@@ -25,7 +25,7 @@ wheels = [
 
 [[package]]
 name = "caltrain-mcp"
-version = "0.5.1.dev1+g9fad56e"
+version = "0.6.1.dev1+gb42c1ce.d20250524"
 source = { editable = "." }
 dependencies = [
     { name = "mcp" },
