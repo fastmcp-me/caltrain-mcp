@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
 
+env:
+  PYTHON_VERSION: "3.13"
+
 permissions:
   contents: write
   id-token: write
@@ -18,7 +21,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - uses: astral-sh/setup-uv@v6
 
@@ -58,7 +61,24 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build package
+      - name: Checkout tagged version
+        if: steps.release.outputs.released == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ steps.release.outputs.version }}
+          fetch-depth: 0
+
+      - name: Setup Python for build
+        if: steps.release.outputs.released == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Setup uv for build
+        if: steps.release.outputs.released == 'true'
+        uses: astral-sh/setup-uv@v6
+
+      - name: Build package from clean tag
         if: steps.release.outputs.released == 'true'
         run: uv build
 
