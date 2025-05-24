@@ -1,6 +1,20 @@
 # CHANGELOG
 
 
+## v0.5.0 (2025-05-24)
+
+### Chores
+
+- Update CI workflow to use environment variable for Python version for improved flexibility
+  ([`fd917d1`](https://github.com/davidyen1124/caltrain-mcp/commit/fd917d19725bb3be7683c80e664674f5138c21a4))
+
+### Features
+
+- Enhance CI workflow by introducing environment variable for Python version and adding steps for
+  building from tagged releases
+  ([`938e6f4`](https://github.com/davidyen1124/caltrain-mcp/commit/938e6f495b1cfc922cc1d1570021bf946f528cc0))
+
+
 ## v0.4.0 (2025-05-24)
 
 ### Features
