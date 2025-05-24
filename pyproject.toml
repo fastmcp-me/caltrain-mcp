@@ -96,10 +96,10 @@ include = [
 
 [tool.semantic_release]
 version_source = "tag"
+version_pattern = "src/caltrain_mcp/__init__.py:__version__ = \"{version}\""
+tag_format = "v{version}"
 branch = "main"
 upload_to_pypi = false
-version_variables = [
-    "src/caltrain_mcp/__init__.py:__version__",
-]
+upload_to_vcs_release = true
 changelog_file = "CHANGELOG.md"
 build_command = "pip install build && python -m build"
