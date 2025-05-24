@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.6.1 (2025-05-24)
+
+### Bug Fixes
+
+- Redirect logging to stderr to prevent MCP protocol interference
+  ([`b42c1ce`](https://github.com/davidyen1124/caltrain-mcp/commit/b42c1ce5021fc28ad424024ffeae5c12ada39d74))
+
+
 ## v0.6.0 (2025-05-24)
 
 ### Features
