@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.8.1 (2025-06-14)
+
+### Documentation
+
+- Add Cursor badge
+  ([`17f55e9`](https://github.com/davidyen1124/caltrain-mcp/commit/17f55e990daa50bdbd8b8de8f70e5872f3fe8534))
+
+
 ## v0.8.0 (2025-05-24)
 
 ### Features
