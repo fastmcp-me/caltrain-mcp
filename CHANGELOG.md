@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.8.3 (2025-06-15)
+
+### Performance Improvements
+
+- Cache platform stops mapping
+  ([`fa83cf4`](https://github.com/davidyen1124/caltrain-mcp/commit/fa83cf44359ea69e5b69d9a8a40273338c1e6d67))
+
+
 ## v0.8.2 (2025-06-15)
 
 ### Chores
