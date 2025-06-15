@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.8.2 (2025-06-15)
+
+### Chores
+
+- Drop requests dependency
+  ([`7aca9c0`](https://github.com/davidyen1124/caltrain-mcp/commit/7aca9c009cf3016efb491867f9c83a437824f058))
+
+
 ## v0.8.1 (2025-06-14)
 
 ### Documentation
