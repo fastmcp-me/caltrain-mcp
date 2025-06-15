@@ -8,9 +8,8 @@ import io
 import pathlib
 import shutil
 import tempfile
+import urllib.request
 import zipfile
-
-import requests
 
 GTFS_URL = "https://data.trilliumtransit.com/gtfs/caltrain-ca-us/caltrain-ca-us.zip"
 TARGET_DIR = (
@@ -24,11 +23,11 @@ TARGET_DIR = (
 
 def main():
     print("Downloading GTFS…")
-    r = requests.get(GTFS_URL, timeout=60)
-    r.raise_for_status()
+    with urllib.request.urlopen(GTFS_URL, timeout=60) as r:
+        data = r.read()
 
     with tempfile.TemporaryDirectory() as td:
-        with zipfile.ZipFile(io.BytesIO(r.content)) as zf:
+        with zipfile.ZipFile(io.BytesIO(data)) as zf:
             zf.extractall(td)
 
         # Clean and create data directory
