@@ -53,10 +53,11 @@ async def next_trains(
         )
 
         # Find station IDs with enhanced error handling
+        data = gtfs.get_default_data()
         try:
-            origin_id = gtfs.find_station(origin)
+            origin_id = gtfs.find_station(origin, data)
         except ValueError:
-            available_stations = gtfs.list_all_stations()
+            available_stations = gtfs.list_all_stations(data)
             # Try to find close matches
             close_matches = [
                 s
@@ -74,9 +75,9 @@ async def next_trains(
             return error_msg
 
         try:
-            dest_id = gtfs.find_station(destination)
+            dest_id = gtfs.find_station(destination, data)
         except ValueError:
-            available_stations = gtfs.list_all_stations()
+            available_stations = gtfs.list_all_stations(data)
             # Try to find close matches
             close_matches = [
                 s
@@ -94,12 +95,16 @@ async def next_trains(
             return error_msg
 
         # Get station names for display
-        origin_name = gtfs.get_station_name(origin_id)
-        dest_name = gtfs.get_station_name(dest_id)
+        origin_name = gtfs.get_station_name(origin_id, data)
+        dest_name = gtfs.get_station_name(dest_id, data)
 
         # Find next trains
         trains = gtfs.find_next_trains(
-            origin_id, dest_id, seconds_since_midnight, target_date
+            origin_id,
+            dest_id,
+            seconds_since_midnight,
+            target_date,
+            data,
         )
 
         if not trains:
@@ -137,7 +142,7 @@ async def list_stations() -> str:
     or destination in the next_trains() tool.
     """
     try:
-        stations = gtfs.list_all_stations()
+        stations = gtfs.list_all_stations(gtfs.get_default_data())
         stations_list = "\n".join([f"• {station}" for station in stations])
         return f"Available Caltrain stations:\n{stations_list}\n\nNote: Station names support common abbreviations like 'SF' for San Francisco and 'SJ' for San Jose."
     except Exception as e:
@@ -149,10 +154,8 @@ def main() -> None:
     # Only load GTFS data when not in test mode
     if os.getenv("PYTEST_CURRENT_TEST") is None and "pytest" not in sys.modules:
         try:
-            gtfs.load_gtfs_data()
-            stations_count = (
-                len(gtfs.STATIONS_DF) if gtfs.STATIONS_DF is not None else 0
-            )
+            data = gtfs.get_default_data()
+            stations_count = len(data.stations)
             # Use stderr for logging to avoid interfering with MCP protocol on stdout
             print(
                 f"Loaded GTFS data successfully. Found {stations_count} stations.",

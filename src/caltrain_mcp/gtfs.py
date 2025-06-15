@@ -2,20 +2,25 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import date
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
-# Global data frames - will be loaded once at startup
-ALL_STOPS_DF = None
-STATIONS_DF = None
-TRIPS_DF = None
-STOP_TIMES_DF = None
-CALENDAR_DF = None
-# Mapping of station_id -> list of platform stop_ids
-STATION_TO_PLATFORM_STOPS: dict[str, list[str]] | None = None
+
+@dataclass
+class GTFSData:
+    """Container for all loaded GTFS tables."""
+
+    all_stops: pd.DataFrame
+    stations: pd.DataFrame
+    trips: pd.DataFrame
+    stop_times: pd.DataFrame
+    calendar: pd.DataFrame
+    station_to_platform_stops: dict[str, list[str]]
 
 
 def get_gtfs_folder() -> Path:
@@ -32,31 +37,29 @@ def get_gtfs_folder() -> Path:
     )
 
 
-def load_gtfs_data() -> None:
-    """Load and prepare GTFS data at startup."""
-    global ALL_STOPS_DF, STATIONS_DF, TRIPS_DF, STOP_TIMES_DF, CALENDAR_DF
-    global STATION_TO_PLATFORM_STOPS
+def load_gtfs_data() -> GTFSData:
+    """Load and prepare GTFS data and return a :class:`GTFSData` instance."""
 
     gtfs_folder = get_gtfs_folder()
     if not gtfs_folder.exists():
         raise FileNotFoundError(f"GTFS folder '{gtfs_folder}' not found.")
 
     # Load GTFS files
-    ALL_STOPS_DF = pd.read_csv(gtfs_folder / "stops.txt")
-    TRIPS_DF = pd.read_csv(gtfs_folder / "trips.txt")
-    STOP_TIMES_DF = pd.read_csv(gtfs_folder / "stop_times.txt")
-    CALENDAR_DF = pd.read_csv(gtfs_folder / "calendar.txt")
+    all_stops_df = pd.read_csv(gtfs_folder / "stops.txt")
+    trips_df = pd.read_csv(gtfs_folder / "trips.txt")
+    stop_times_df = pd.read_csv(gtfs_folder / "stop_times.txt")
+    calendar_df = pd.read_csv(gtfs_folder / "calendar.txt")
 
     # Ensure consistent data types for stop_id columns
-    ALL_STOPS_DF["stop_id"] = ALL_STOPS_DF["stop_id"].astype(str)
-    STOP_TIMES_DF["stop_id"] = STOP_TIMES_DF["stop_id"].astype(str)
+    all_stops_df["stop_id"] = all_stops_df["stop_id"].astype(str)
+    stop_times_df["stop_id"] = stop_times_df["stop_id"].astype(str)
 
     # Filter stops to only include station stops (location_type == 1)
-    STATIONS_DF = ALL_STOPS_DF[ALL_STOPS_DF["location_type"] == 1].copy()
+    stations_df = all_stops_df[all_stops_df["location_type"] == 1].copy()
 
     # Create normalized station names for searching
-    STATIONS_DF["normalized_name"] = (
-        STATIONS_DF["stop_name"]
+    stations_df["normalized_name"] = (
+        stations_df["stop_name"]
         .str.lower()
         .str.replace(" station", "")
         .str.replace(" caltrain", "")
@@ -70,21 +73,35 @@ def load_gtfs_data() -> None:
             return str(int(value))
         return str(value)
 
-    ALL_STOPS_DF["parent_station_str"] = ALL_STOPS_DF["parent_station"].apply(
+    all_stops_df["parent_station_str"] = all_stops_df["parent_station"].apply(
         convert_parent_station
     )
     grouped = (
-        ALL_STOPS_DF.dropna(subset=["parent_station_str"])
+        all_stops_df.dropna(subset=["parent_station_str"])
         .groupby("parent_station_str")["stop_id"]
         .apply(lambda s: s.astype(str).tolist())
     )
-    STATION_TO_PLATFORM_STOPS = grouped.to_dict()
+    station_to_platform = grouped.to_dict()
+
+    return GTFSData(
+        all_stops=all_stops_df,
+        stations=stations_df,
+        trips=trips_df,
+        stop_times=stop_times_df,
+        calendar=calendar_df,
+        station_to_platform_stops=station_to_platform,
+    )
 
 
-def get_active_service_ids(target_date: date) -> list[str]:
+@lru_cache(maxsize=1)
+def get_default_data() -> GTFSData:
+    """Load GTFS data on first use and cache the result."""
+    return load_gtfs_data()
+
+
+def get_active_service_ids(target_date: date, data: GTFSData) -> list[str]:
     """Get service IDs that are active on the given date."""
-    if CALENDAR_DF is None:
-        raise RuntimeError("GTFS data not loaded. Call load_gtfs_data() first.")
+    calendar_df = data.calendar
 
     weekday_map = {
         0: "monday",
@@ -100,19 +117,18 @@ def get_active_service_ids(target_date: date) -> list[str]:
     date_str = target_date.strftime("%Y%m%d")
 
     # Find services that run on this day of week and are within date range
-    active_services = CALENDAR_DF[
-        (CALENDAR_DF[day_name] == 1)
-        & (CALENDAR_DF["start_date"] <= int(date_str))
-        & (CALENDAR_DF["end_date"] >= int(date_str))
+    active_services = calendar_df[
+        (calendar_df[day_name] == 1)
+        & (calendar_df["start_date"] <= int(date_str))
+        & (calendar_df["end_date"] >= int(date_str))
     ]
 
     return active_services["service_id"].tolist()
 
 
-def find_station(name: str) -> str:
+def find_station(name: str, data: GTFSData) -> str:
     """Find a station ID by name (fuzzy matching)."""
-    if STATIONS_DF is None:
-        raise RuntimeError("GTFS data not loaded. Call load_gtfs_data() first.")
+    stations_df = data.stations
 
     name_norm = name.lower().strip()
 
@@ -151,15 +167,15 @@ def find_station(name: str) -> str:
         name_norm = abbreviations[name_norm]
 
     # Try exact match first on normalized names
-    exact_match = STATIONS_DF[
-        STATIONS_DF["normalized_name"].str.contains(name_norm, na=False, regex=False)
+    exact_match = stations_df[
+        stations_df["normalized_name"].str.contains(name_norm, na=False, regex=False)
     ]
     if not exact_match.empty:
         return str(exact_match.iloc[0]["stop_id"])
 
     # Try partial match on full station names
-    partial_match = STATIONS_DF[
-        STATIONS_DF["stop_name"]
+    partial_match = stations_df[
+        stations_df["stop_name"]
         .str.lower()
         .str.contains(name_norm, na=False, regex=False)
     ]
@@ -167,8 +183,8 @@ def find_station(name: str) -> str:
         return str(partial_match.iloc[0]["stop_id"])
 
     # Try starts with matching for partial names
-    starts_with = STATIONS_DF[
-        STATIONS_DF["stop_name"].str.lower().str.startswith(name_norm, na=False)
+    starts_with = stations_df[
+        stations_df["stop_name"].str.lower().str.startswith(name_norm, na=False)
     ]
     if not starts_with.empty:
         return str(starts_with.iloc[0]["stop_id"])
@@ -176,23 +192,19 @@ def find_station(name: str) -> str:
     raise ValueError(f"Station not found: {name}")
 
 
-def get_station_name(stop_id: str) -> str:
+def get_station_name(stop_id: str, data: GTFSData) -> str:
     """Get the display name for a station."""
-    if STATIONS_DF is None:
-        raise RuntimeError("GTFS data not loaded. Call load_gtfs_data() first.")
+    stations_df = data.stations
 
-    station = STATIONS_DF[STATIONS_DF["stop_id"] == stop_id]
+    station = stations_df[stations_df["stop_id"] == stop_id]
     if station.empty:
         return stop_id
     return str(station.iloc[0]["stop_name"])
 
 
-def get_platform_stops_for_station(station_id: str) -> list[str]:
+def get_platform_stops_for_station(station_id: str, data: GTFSData) -> list[str]:
     """Get all platform stop IDs that belong to a station."""
-    if STATION_TO_PLATFORM_STOPS is None:
-        raise RuntimeError("GTFS data not loaded. Call load_gtfs_data() first.")
-
-    return STATION_TO_PLATFORM_STOPS.get(station_id, [])
+    return data.station_to_platform_stops.get(station_id, [])
 
 
 def time_to_seconds(time_str: str | None) -> int | None:
@@ -224,35 +236,37 @@ def find_next_trains(
     destination_station_id: str,
     after_seconds: int,
     target_date: date,
+    data: GTFSData,
     limit: int = 5,
 ) -> list[tuple[str, str, str, str]]:
     """Find the next trains from origin to destination."""
-    if TRIPS_DF is None or STOP_TIMES_DF is None:
-        raise RuntimeError("GTFS data not loaded. Call load_gtfs_data() first.")
+
+    trips_df = data.trips
+    stop_times_df = data.stop_times
 
     # Get active service IDs for the target date
-    service_ids = get_active_service_ids(target_date)
+    service_ids = get_active_service_ids(target_date, data)
     if not service_ids:
         return []
 
     # Filter trips to only those running today
-    active_trips = TRIPS_DF[TRIPS_DF["service_id"].isin(service_ids)]
+    active_trips = trips_df[trips_df["service_id"].isin(service_ids)]
 
     if active_trips.empty:
         return []
 
     # Get platform stops for both stations
-    origin_platforms = get_platform_stops_for_station(origin_station_id)
-    dest_platforms = get_platform_stops_for_station(destination_station_id)
+    origin_platforms = get_platform_stops_for_station(origin_station_id, data)
+    dest_platforms = get_platform_stops_for_station(destination_station_id, data)
 
     if not origin_platforms or not dest_platforms:
         return []
 
     # Get stop times for origin platforms
-    origin_times = STOP_TIMES_DF[STOP_TIMES_DF["stop_id"].isin(origin_platforms)].copy()
+    origin_times = stop_times_df[stop_times_df["stop_id"].isin(origin_platforms)].copy()
 
     # Get stop times for destination platforms
-    dest_times = STOP_TIMES_DF[STOP_TIMES_DF["stop_id"].isin(dest_platforms)].copy()
+    dest_times = stop_times_df[stop_times_df["stop_id"].isin(dest_platforms)].copy()
 
     # Join on trip_id to get trips that serve both stations
     combined = origin_times.merge(
@@ -300,9 +314,6 @@ def find_next_trains(
     return results
 
 
-def list_all_stations() -> list[str]:
+def list_all_stations(data: GTFSData) -> list[str]:
     """Get a list of all available Caltrain stations."""
-    if STATIONS_DF is None:
-        raise RuntimeError("GTFS data not loaded. Call load_gtfs_data() first.")
-
-    return STATIONS_DF["stop_name"].sort_values().tolist()
+    return data.stations["stop_name"].sort_values().tolist()
