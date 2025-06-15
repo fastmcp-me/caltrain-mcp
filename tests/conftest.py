@@ -43,3 +43,19 @@ T1,08:50:00,08:50:00,201,2
     gtfs.STOP_TIMES_DF = pd.read_csv(StringIO(st_csv))
     # Ensure consistent data types for stop_id columns (like in real GTFS loading)
     gtfs.STOP_TIMES_DF["stop_id"] = gtfs.STOP_TIMES_DF["stop_id"].astype(str)
+
+    def _conv(v):
+        if pd.isna(v):
+            return None
+        if isinstance(v, float) and v.is_integer():
+            return str(int(v))
+        return str(v)
+
+    parent_station_str = gtfs.ALL_STOPS_DF["parent_station"].apply(_conv)
+    gtfs.ALL_STOPS_DF["parent_station_str"] = parent_station_str
+    grouped = (
+        gtfs.ALL_STOPS_DF.dropna(subset=["parent_station_str"])
+        .groupby("parent_station_str")["stop_id"]
+        .apply(lambda s: s.astype(str).tolist())
+    )
+    gtfs.STATION_TO_PLATFORM_STOPS = grouped.to_dict()

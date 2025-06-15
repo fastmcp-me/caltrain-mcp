@@ -14,6 +14,8 @@ STATIONS_DF = None
 TRIPS_DF = None
 STOP_TIMES_DF = None
 CALENDAR_DF = None
+# Mapping of station_id -> list of platform stop_ids
+STATION_TO_PLATFORM_STOPS: dict[str, list[str]] | None = None
 
 
 def get_gtfs_folder() -> Path:
@@ -33,6 +35,7 @@ def get_gtfs_folder() -> Path:
 def load_gtfs_data() -> None:
     """Load and prepare GTFS data at startup."""
     global ALL_STOPS_DF, STATIONS_DF, TRIPS_DF, STOP_TIMES_DF, CALENDAR_DF
+    global STATION_TO_PLATFORM_STOPS
 
     gtfs_folder = get_gtfs_folder()
     if not gtfs_folder.exists():
@@ -58,6 +61,24 @@ def load_gtfs_data() -> None:
         .str.replace(" station", "")
         .str.replace(" caltrain", "")
     )
+
+    # Precompute mapping of station ID -> platform stop IDs
+    def convert_parent_station(value: Any) -> str | None:
+        if pd.isna(value):
+            return None
+        if isinstance(value, float) and value.is_integer():
+            return str(int(value))
+        return str(value)
+
+    ALL_STOPS_DF["parent_station_str"] = ALL_STOPS_DF["parent_station"].apply(
+        convert_parent_station
+    )
+    grouped = (
+        ALL_STOPS_DF.dropna(subset=["parent_station_str"])
+        .groupby("parent_station_str")["stop_id"]
+        .apply(lambda s: s.astype(str).tolist())
+    )
+    STATION_TO_PLATFORM_STOPS = grouped.to_dict()
 
 
 def get_active_service_ids(target_date: date) -> list[str]:
@@ -168,24 +189,10 @@ def get_station_name(stop_id: str) -> str:
 
 def get_platform_stops_for_station(station_id: str) -> list[str]:
     """Get all platform stop IDs that belong to a station."""
-    if ALL_STOPS_DF is None:
+    if STATION_TO_PLATFORM_STOPS is None:
         raise RuntimeError("GTFS data not loaded. Call load_gtfs_data() first.")
 
-    # Find all stops that have this station as their parent
-    # Handle both string and numeric parent_station values, excluding NaN
-    # Convert float values to int first to avoid "100.0" vs "100" mismatch
-    def convert_parent_station(value: Any) -> str | None:
-        if pd.isna(value):
-            return None
-        # If it's a float and has no decimal part, convert to int then string
-        if isinstance(value, float) and value.is_integer():
-            return str(int(value))
-        return str(value)
-
-    parent_station_str = ALL_STOPS_DF["parent_station"].apply(convert_parent_station)
-    mask = parent_station_str == station_id
-    platform_stops = ALL_STOPS_DF[mask]
-    return platform_stops["stop_id"].tolist()
+    return STATION_TO_PLATFORM_STOPS.get(station_id, [])
 
 
 def time_to_seconds(time_str: str | None) -> int | None:
