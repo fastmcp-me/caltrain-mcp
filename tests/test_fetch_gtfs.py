@@ -1,11 +1,10 @@
 import importlib.util
 import io
+import urllib.error
 import zipfile
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
-import requests
 
 # Import fetch_gtfs module directly
 _fetch_gtfs_path = Path(__file__).parent.parent / "scripts" / "fetch_gtfs.py"
@@ -25,15 +24,20 @@ def test_download_and_extract(monkeypatch, tmp_path):
     """main() should download, unzip, and move contents into TARGET_DIR."""
     fake_zip = _make_zip()
 
-    # --- stub requests.get ---------------------------------
-    def fake_get(url, timeout):
+    # --- stub urllib.request.urlopen -----------------------
+    class FakeResp(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def fake_urlopen(url, timeout):
         assert url == fetch_gtfs.GTFS_URL
         assert timeout == 60
-        return SimpleNamespace(
-            content=fake_zip, status_code=200, raise_for_status=lambda: None
-        )
+        return FakeResp(fake_zip)
 
-    monkeypatch.setattr(fetch_gtfs.requests, "get", fake_get)
+    monkeypatch.setattr(fetch_gtfs.urllib.request, "urlopen", fake_urlopen)
 
     # --- redirect TARGET_DIR into a temp dir ---------------
     monkeypatch.setattr(fetch_gtfs, "TARGET_DIR", tmp_path / "data")
@@ -49,45 +53,43 @@ def test_download_and_extract(monkeypatch, tmp_path):
 def test_network_failure(monkeypatch, tmp_path):
     """main() should raise an exception when network request fails."""
 
-    def fake_get(url, timeout):
-        raise requests.exceptions.ConnectionError("Network error")
+    def fake_urlopen(url, timeout):
+        raise urllib.error.URLError("Network error")
 
-    monkeypatch.setattr(fetch_gtfs.requests, "get", fake_get)
+    monkeypatch.setattr(fetch_gtfs.urllib.request, "urlopen", fake_urlopen)
     monkeypatch.setattr(fetch_gtfs, "TARGET_DIR", tmp_path / "data")
 
-    with pytest.raises(requests.exceptions.ConnectionError):
+    with pytest.raises(urllib.error.URLError):
         fetch_gtfs.main()
 
 
 def test_http_error_status(monkeypatch, tmp_path):
     """main() should raise an exception when HTTP status indicates error."""
 
-    def fake_get(url, timeout):
-        def raise_for_status():
-            raise requests.exceptions.HTTPError("404 Not Found")
+    def fake_urlopen(url, timeout):
+        raise urllib.error.HTTPError(url, 404, "Not Found", {}, None)
 
-        return SimpleNamespace(
-            content=b"", status_code=404, raise_for_status=raise_for_status
-        )
-
-    monkeypatch.setattr(fetch_gtfs.requests, "get", fake_get)
+    monkeypatch.setattr(fetch_gtfs.urllib.request, "urlopen", fake_urlopen)
     monkeypatch.setattr(fetch_gtfs, "TARGET_DIR", tmp_path / "data")
 
-    with pytest.raises(requests.exceptions.HTTPError):
+    with pytest.raises(urllib.error.HTTPError):
         fetch_gtfs.main()
 
 
 def test_invalid_zip_file(monkeypatch, tmp_path):
     """main() should raise an exception when downloaded content is not a valid ZIP."""
 
-    def fake_get(url, timeout):
-        return SimpleNamespace(
-            content=b"invalid zip content",
-            status_code=200,
-            raise_for_status=lambda: None,
-        )
+    class FakeResp(io.BytesIO):
+        def __enter__(self):
+            return self
 
-    monkeypatch.setattr(fetch_gtfs.requests, "get", fake_get)
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def fake_urlopen(url, timeout):
+        return FakeResp(b"invalid zip content")
+
+    monkeypatch.setattr(fetch_gtfs.urllib.request, "urlopen", fake_urlopen)
     monkeypatch.setattr(fetch_gtfs, "TARGET_DIR", tmp_path / "data")
 
     with pytest.raises(zipfile.BadZipFile):
@@ -104,12 +106,17 @@ def test_cleanup_existing_target_dir(monkeypatch, tmp_path):
     old_file = target_dir / "old_file.txt"
     old_file.write_text("old content")
 
-    def fake_get(url, timeout):
-        return SimpleNamespace(
-            content=fake_zip, status_code=200, raise_for_status=lambda: None
-        )
+    class FakeResp(io.BytesIO):
+        def __enter__(self):
+            return self
 
-    monkeypatch.setattr(fetch_gtfs.requests, "get", fake_get)
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def fake_urlopen(url, timeout):
+        return FakeResp(fake_zip)
+
+    monkeypatch.setattr(fetch_gtfs.urllib.request, "urlopen", fake_urlopen)
     monkeypatch.setattr(fetch_gtfs, "TARGET_DIR", target_dir)
 
     # run it
@@ -129,12 +136,17 @@ def test_empty_zip_file(monkeypatch, tmp_path):
         pass  # Empty ZIP
     empty_zip = buf.getvalue()
 
-    def fake_get(url, timeout):
-        return SimpleNamespace(
-            content=empty_zip, status_code=200, raise_for_status=lambda: None
-        )
+    class FakeResp(io.BytesIO):
+        def __enter__(self):
+            return self
 
-    monkeypatch.setattr(fetch_gtfs.requests, "get", fake_get)
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def fake_urlopen(url, timeout):
+        return FakeResp(empty_zip)
+
+    monkeypatch.setattr(fetch_gtfs.urllib.request, "urlopen", fake_urlopen)
     monkeypatch.setattr(fetch_gtfs, "TARGET_DIR", tmp_path / "data")
 
     # Should not raise an exception
@@ -155,12 +167,17 @@ def test_zip_with_multiple_files(monkeypatch, tmp_path):
         z.writestr("trips.txt", "trip_id,route_id\n1,1\n")
     multi_file_zip = buf.getvalue()
 
-    def fake_get(url, timeout):
-        return SimpleNamespace(
-            content=multi_file_zip, status_code=200, raise_for_status=lambda: None
-        )
+    class FakeResp(io.BytesIO):
+        def __enter__(self):
+            return self
 
-    monkeypatch.setattr(fetch_gtfs.requests, "get", fake_get)
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def fake_urlopen(url, timeout):
+        return FakeResp(multi_file_zip)
+
+    monkeypatch.setattr(fetch_gtfs.urllib.request, "urlopen", fake_urlopen)
     monkeypatch.setattr(fetch_gtfs, "TARGET_DIR", tmp_path / "data")
 
     fetch_gtfs.main()
