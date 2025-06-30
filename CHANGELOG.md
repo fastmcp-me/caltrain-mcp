@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.8.4 (2025-06-30)
+
+### Chores
+
+- Refresh GTFS feed
+  ([`9ca1bbb`](https://github.com/davidyen1124/caltrain-mcp/commit/9ca1bbbc1d6e52495c1ec7e7523e76a422b491d5))
+
+### Refactoring
+
+- Replace global GTFS state with data object
+  ([`a7bf292`](https://github.com/davidyen1124/caltrain-mcp/commit/a7bf29245badc79ffbaa551bdbfd5764603ca011))
+
+
 ## v0.8.3 (2025-06-15)
 
 ### Performance Improvements
